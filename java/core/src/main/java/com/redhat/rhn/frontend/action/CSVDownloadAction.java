@@ -24,6 +24,11 @@ import com.redhat.rhn.domain.user.User;
 import com.redhat.rhn.frontend.dto.BaseDto;
 import com.redhat.rhn.frontend.struts.RequestContext;
 import com.redhat.rhn.frontend.taglibs.list.TagHelper;
+import com.redhat.rhn.common.util.DynamicComparator;
+import com.redhat.rhn.frontend.taglibs.list.ColumnFilter;
+import com.redhat.rhn.frontend.taglibs.list.ListFilterHelper;
+import com.redhat.rhn.frontend.taglibs.list.ListTagUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import org.apache.commons.collections.ListUtils;
 import org.apache.logging.log4j.LogManager;
@@ -182,6 +187,27 @@ public class CSVDownloadAction extends DownloadAction {
 
         String exportColumns = getExportColumns(request, session);
         List<BaseDto> pageData = getPageData(request, session);
+        String uniqueName = getUniqueName(request);
+
+        // Apply filtering
+        String filterAttr = request.getParameter(ListTagUtil.makeFilterAttributeByLabel(uniqueName));
+        String filterValue = request.getParameter(ListTagUtil.makeFilterValueByLabel(uniqueName));
+        if (StringUtils.isNotBlank(filterAttr) && StringUtils.isNotBlank(filterValue)) {
+            ColumnFilter filter = new ColumnFilter("", filterAttr);
+            pageData = ListFilterHelper.filter(pageData, filter, filterAttr, filterValue);
+        }
+
+        // Apply sorting
+        String sortAttr = request.getParameter(ListTagUtil.makeSortByLabel(uniqueName));
+        String sortDir = request.getParameter(ListTagUtil.makeSortDirLabel(uniqueName));
+        if (StringUtils.isNotBlank(sortAttr)) {
+            try {
+                pageData = pageData.stream().sorted(new DynamicComparator<>(sortAttr, sortDir)).collect(Collectors.toList());
+            }
+            catch (IllegalArgumentException iae) {
+                LOG.warn("Unable to sort dataset according to: {}", sortAttr);
+            }
+        }
 
         // Read the CSV separator from user preferences
         User user = new RequestContext(request).getCurrentUser();

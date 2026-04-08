@@ -22,6 +22,7 @@ import com.redhat.rhn.frontend.taglibs.IconTag;
 import com.redhat.rhn.frontend.taglibs.list.helper.ListHelper;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -215,17 +216,28 @@ public class CSVTag extends BodyTagSupport {
         // so CSVDownloadAction is able to retreive them.
         session.setAttribute(paramExportColumns, exportColumns);
 
-        String csvKey =
-            CSVDownloadAction.EXPORT_COLUMNS + "=" + paramExportColumns +
-                "&" + exportDataToSession(session) +
-                "&" + CSVDownloadAction.UNIQUE_NAME + "=" + getUniqueName();
+        StringBuilder csvKey = new StringBuilder();
+        csvKey.append(CSVDownloadAction.EXPORT_COLUMNS).append("=").append(paramExportColumns);
+        csvKey.append("&").append(exportDataToSession(session));
+        csvKey.append("&").append(CSVDownloadAction.UNIQUE_NAME).append("=").append(getUniqueName());
 
         if (header != null) {
             session.setAttribute(paramHeader, header);
-            csvKey += "&" + CSVDownloadAction.HEADER_NAME + "=" + paramHeader;
+            csvKey.append("&").append(CSVDownloadAction.HEADER_NAME).append("=").append(paramHeader);
         }
 
-        return csvKey;
+        // Add filter and sort parameters from the request
+        String listPrefix = "list_" + getUniqueName();
+        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith(listPrefix) || key.startsWith("filter_" + getUniqueName())
+                    || key.startsWith("filterattr_" + getUniqueName())
+                    || key.startsWith("filterclass_" + getUniqueName())) {
+                csvKey.append("&").append(key).append("=").append(entry.getValue()[0]);
+            }
+        }
+
+        return csvKey.toString();
     }
 
     private String exportDataToSession(HttpSession session) {
