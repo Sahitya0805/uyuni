@@ -191,6 +191,9 @@ public class CSVDownloadAction extends DownloadAction {
 
         // Apply filtering
         String filterAttr = request.getParameter(ListTagUtil.makeFilterAttributeByLabel(uniqueName));
+        if (StringUtils.isBlank(filterAttr)) {
+            filterAttr = request.getParameter(ListTagUtil.makeFilterByLabel(uniqueName));
+        }
         String filterValue = request.getParameter(ListTagUtil.makeFilterValueByLabel(uniqueName));
         if (StringUtils.isNotBlank(filterAttr) && StringUtils.isNotBlank(filterValue)) {
             ColumnFilter filter = new ColumnFilter("", filterAttr);

@@ -211,6 +211,15 @@ public class CVEAuditController {
                 log.warn("Unknown CVE Identifier '{}'", cveIdentifier);
             }
         }
+
+        String query = req.queryParams("q");
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(query)) {
+            String lowerQuery = query.toLowerCase();
+            cveAuditSystems = cveAuditSystems.stream()
+                    .filter(s -> s.getName().toLowerCase().contains(lowerQuery))
+                    .collect(Collectors.toList());
+        }
+
         String result = cveAuditSystems.stream().map(
                 system -> "" + system.getPatchStatus() + "," + system.getName() + "," +
                         system.getPatchAdvisory() + "," + system.getChannelName()
