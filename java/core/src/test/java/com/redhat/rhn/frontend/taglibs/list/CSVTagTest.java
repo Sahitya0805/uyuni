@@ -80,6 +80,8 @@ public class CSVTagTest extends MockObjectTestCase {
             atLeast(1).of(session).setAttribute(
                     with(equal("pageList_" + csv.getUniqueName())),
                     with(any(List.class)));
+            atLeast(1).of(req).getParameterMap();
+            will(returnValue(java.util.Collections.emptyMap()));
         } });
     }
 

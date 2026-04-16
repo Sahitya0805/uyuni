@@ -233,7 +233,13 @@ public class CSVTag extends BodyTagSupport {
             if (key.startsWith(listPrefix) || key.startsWith("filter_" + getUniqueName())
                     || key.startsWith("filterattr_" + getUniqueName())
                     || key.startsWith("filterclass_" + getUniqueName())) {
-                csvKey.append("&").append(key).append("=").append(entry.getValue()[0]);
+                try {
+                    csvKey.append("&").append(key).append("=")
+                            .append(java.net.URLEncoder.encode(entry.getValue()[0], "UTF-8"));
+                }
+                catch (java.io.UnsupportedEncodingException e) {
+                    // utf-8 is always supported
+                }
             }
         }
 

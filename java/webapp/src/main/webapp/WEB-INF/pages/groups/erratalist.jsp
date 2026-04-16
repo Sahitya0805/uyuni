@@ -29,7 +29,7 @@
     </div>
     <rhn:hidden name="sgid" value="${systemgroup.id}" />
 
-    <rl:list emptykey="erratalist.jsp.noerrata">
+    <rl:list name="errataList" emptykey="erratalist.jsp.noerrata">
 
         <rl:decorator name="PageSizeDecorator" />
         <rl:decorator name="ElaborationDecorator" />
