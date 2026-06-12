@@ -1,0 +1,13 @@
+--- astropy/units/quantity.py
++++ astropy/units/quantity.py
+@@ -657,7 +657,9 @@
+             return self._result_as_quantity(result, unit, out)
+
+         except (TypeError, ValueError, AttributeError) as e:
+-            out_normalized = kwargs.get("out", ())
++            out_normalized = kwargs.get("out", ())
++            if out_normalized is None:
++                out_normalized = ()
+             inputs_and_outputs = inputs + out_normalized
+             ignored_ufunc = (
+                 None,
